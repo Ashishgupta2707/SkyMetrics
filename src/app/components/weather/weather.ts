@@ -1,5 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { NotificationService } from '../../services/notification/notification-service';
+import { Fetcher } from '../../services/fetcher/fetcher';
 
 @Component({
   selector: 'app-weather',
@@ -8,10 +10,13 @@ import { FormsModule } from '@angular/forms';
   styleUrl: './weather.scss',
 })
 export class Weather {
+  private notify: NotificationService = inject(NotificationService);
+  private fetcher: Fetcher = inject(Fetcher);
+
   isCelsius = false;
   location = '';
   currentDate = '11/26/2025';
-  currentTemp : string = '79';
+  currentTemp: string = '79';
   weatherCondition = 'Sunny';
 
   weatherDetails: any[] = [
@@ -20,13 +25,34 @@ export class Weather {
     { icon: '💧', label: 'Humidity', value: '83%' },
     { icon: '💨', label: 'Wind (mph)', value: '6.9' },
     { icon: '☀️', label: 'UV', value: '0.9' },
-    { icon: '❄️', label: 'Chance of Snow', value: '0%' }
+    { icon: '❄️', label: 'Chance of Snow', value: '0%' },
   ];
 
   forecast: any[] = [
-    { day: 'Wednesday', icon: '☀️', temp: '73.3', low: '65.3', high: '85.5', highlighted: true },
-    { day: 'Thursday', icon: '☁️', temp: '69', low: '60.6', high: '71.6', highlighted: false },
-    { day: 'Friday', icon: '⛅', temp: '58.1', low: '49.6', high: '68.2', highlighted: false }
+    {
+      day: 'Wednesday',
+      icon: '☀️',
+      temp: '73.3',
+      low: '65.3',
+      high: '85.5',
+      highlighted: true,
+    },
+    {
+      day: 'Thursday',
+      icon: '☁️',
+      temp: '69',
+      low: '60.6',
+      high: '71.6',
+      highlighted: false,
+    },
+    {
+      day: 'Friday',
+      icon: '⛅',
+      temp: '58.1',
+      low: '49.6',
+      high: '68.2',
+      highlighted: false,
+    },
   ];
 
   toggleTemperatureUnit() {
@@ -35,13 +61,19 @@ export class Weather {
     this.convertFToC();
   }
 
-  convertFToC(){
-    switch(this.isCelsius) {
+  convertFToC() {
+    switch (this.isCelsius) {
       case true:
         this.convertToCelsius();
+        this.notify.show('Converted to Celsius Successfully', 'success', 2000);
         break;
       case false:
         this.convertToFahrenheit();
+        this.notify.show(
+          'Converted to Fahrenheit Successfully',
+          'success',
+          2000
+        );
         break;
       default:
         throw new Error('Invalid temperature unit state');
@@ -49,45 +81,76 @@ export class Weather {
   }
 
   private convertToFahrenheit() {
-    this.currentTemp = this.toFixed(this.fahrenheitToCelsius(parseFloat(this.currentTemp)));
-    this.forecast = this.forecast.map(day => ({
+    this.currentTemp = this.toFixed(
+      this.fahrenheitToCelsius(parseFloat(this.currentTemp))
+    );
+    this.forecast = this.forecast.map((day) => ({
       ...day,
       temp: this.toFixed(this.celsiusToFahrenheit(parseFloat(day.temp))),
       low: this.toFixed(this.celsiusToFahrenheit(parseFloat(day.low))),
-      high: this.toFixed(this.celsiusToFahrenheit(parseFloat(day.high)))
+      high: this.toFixed(this.celsiusToFahrenheit(parseFloat(day.high))),
     }));
-    
+
     // Convert weather details
-    this.weatherDetails[0].value = this.toFixed(this.celsiusToFahrenheit(parseFloat(this.weatherDetails[0].value))) + '°';
+    this.weatherDetails[0].value =
+      this.toFixed(
+        this.celsiusToFahrenheit(parseFloat(this.weatherDetails[0].value))
+      ) + '°';
   }
-  
+
   private convertToCelsius() {
-    this.currentTemp = this.toFixed(this.celsiusToFahrenheit(parseFloat(this.currentTemp)));
-    this.forecast = this.forecast.map(day => ({
+    this.currentTemp = this.toFixed(
+      this.celsiusToFahrenheit(parseFloat(this.currentTemp))
+    );
+    this.forecast = this.forecast.map((day) => ({
       ...day,
       temp: this.toFixed(this.fahrenheitToCelsius(parseFloat(day.temp))),
       low: this.toFixed(this.fahrenheitToCelsius(parseFloat(day.low))),
-      high: this.toFixed(this.fahrenheitToCelsius(parseFloat(day.high)))
+      high: this.toFixed(this.fahrenheitToCelsius(parseFloat(day.high))),
     }));
-    
+
     // Convert weather details
-    this.weatherDetails[0].value = this.toFixed(this.fahrenheitToCelsius(parseFloat(this.weatherDetails[0].value))) + '°';
+    this.weatherDetails[0].value =
+      this.toFixed(
+        this.fahrenheitToCelsius(parseFloat(this.weatherDetails[0].value))
+      ) + '°';
   }
-  
+
   // Conversion utility functions
   private fahrenheitToCelsius(fahrenheit: number): number {
     return (fahrenheit - 32) / 1.8;
   }
-  
+
   private celsiusToFahrenheit(celsius: number): number {
-    return (celsius * 1.8) + 32;
+    return celsius * 1.8 + 32;
   }
-  
+
   private toFixed(value: number, decimals: number = 1): string {
     return value.toFixed(decimals);
   }
 
-  cityEntered(){
+  loadWeatherData() {
+    const param = {
+      city: this.location,
+      lang: 'EN',
+    };
+
+    const header = {
+      'x-rapidapi-host': 'open-weather13.p.rapidapi.com',
+      'x-rapidapi-key': 'cc33edb801mshd8c8d65b779af92p1c3f1ajsn294fe801be07',
+    };
+
+    this.fetcher.get('city', param, header, true).subscribe({
+      next: (res: any) => {
+        if (res) {
+          console.log(res);
+        }
+      },
+    });
+  }
+
+  cityEntered() {
     console.log(this.location);
+    this.loadWeatherData();
   }
 }
