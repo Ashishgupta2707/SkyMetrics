@@ -1,77 +1,145 @@
 <div class="min-h-screen bg-blue-50 flex items-center justify-center p-6">
-    <div class="w-full max-w-5xl">
-      
-      <!-- Main Container -->
-      <div class="bg-white rounded-2xl shadow-lg overflow-hidden">
-        
-        <!-- Header Bar -->
-        <div class="bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-4">
-          <div class="flex items-center justify-between">
-            <!-- Location Search -->
-            <div class="flex items-center gap-3 bg-white/20 rounded-lg px-4 py-2 backdrop-blur-sm flex-1 max-w-md">
-              <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-              </svg>
-              <input
-                type="text"
-                [(ngModel)]="location"
-                (keyup.enter)="cityEntered()"
-                placeholder="Search location..."
-                class="bg-transparent text-white placeholder-white/70 outline-none flex-1 text-sm font-medium"
-              />
+  <div class="w-full max-w-5xl">
+    <!-- Main Container -->
+    <div class="bg-white rounded-2xl shadow-lg overflow-hidden">
+      <!-- Header Bar -->
+      <div class="bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-4">
+        <div class="flex items-center justify-between">
+          <!-- Location Search -->
+          <div
+            class="flex items-center gap-3 bg-white/20 rounded-lg px-4 py-2 backdrop-blur-sm flex-1 max-w-md"
+          >
+            <svg
+              class="w-5 h-5 text-white"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+              ></path>
+            </svg>
+            <input
+              type="text"
+              [(ngModel)]="location"
+              (keyup.enter)="cityEntered()"
+              placeholder="Search location..."
+              class="bg-transparent text-white placeholder-white/70 outline-none flex-1 text-sm font-medium"
+            />
+          </div>
+
+          <!-- Date & Toggle -->
+          <div class="flex items-center gap-4">
+            <div class="text-white/90 text-sm font-medium hidden sm:block">
+              {{ currentDate }}
             </div>
-  
-            <!-- Date & Toggle -->
-            <div class="flex items-center gap-4">
-              <div class="text-white/90 text-sm font-medium hidden sm:block">{{ currentDate }}</div>
-              <div class="flex items-center gap-2 bg-white/20 rounded-lg px-3 py-1.5">
-                <span class="text-white text-sm font-semibold">{{ isCelsius ? "°C" : "°F" }}</span>
-                <button
-                  (click)="toggleTemperatureUnit()"
-                  [class]="'relative w-10 h-5 rounded-full transition-colors ' + (isCelsius ? 'bg-white/40' : 'bg-white/20')"
-                >
-                  <div [class]="'absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full transition-transform ' + (isCelsius ? 'translate-x-5' : 'translate-x-0')"></div>
-                </button>
-              </div>
+            <div
+              class="flex items-center gap-2 bg-white/20 rounded-lg px-3 py-1.5"
+            >
+              <span class="text-white text-sm font-semibold">{{
+                isCelsius ? "°C" : "°F"
+              }}</span>
+              <button
+                (click)="toggleTemperatureUnit()"
+                [class]="
+                  'relative w-10 h-5 rounded-full transition-colors ' +
+                  (isCelsius ? 'bg-white/40' : 'bg-white/20')
+                "
+              >
+                <div
+                  [class]="
+                    'absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full transition-transform ' +
+                    (isCelsius ? 'translate-x-5' : 'translate-x-0')
+                  "
+                ></div>
+              </button>
             </div>
           </div>
         </div>
-  
-        <!-- Main Content -->
-        <div class="p-6">
-          
-          <!-- Current Weather Section -->
-          <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-            
-            <!-- Main Temperature Display -->
-            <div class="lg:col-span-1 flex flex-col items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-100">
-              <div class="text-6xl mb-2">☀️</div>
-              <div class="text-gray-600 text-sm font-medium mb-1">{{ weatherCondition }}</div>
-              <div class="flex items-start">
+      </div>
+
+      <!-- Main Content -->
+      <div class="p-6">
+        <!-- Current Weather Section -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <!-- Main Temperature Display -->
+          <div
+            class="lg:col-span-1 flex flex-col items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-100"
+          >
+            <div class="text-6xl mb-4">☀️</div>
+            <div class="text-gray-600  font-medium mb-1">
+              {{ weatherCondition }}
+            </div>
+            <!-- <div class="flex items-start">
                 <span class="text-7xl font-bold text-gray-900">{{ currentTemp }}</span>
                 <span class="text-3xl font-light text-gray-600 mt-2">°</span>
               </div>
-            </div>
-  
-            <!-- Weather Details Grid -->
-            <div class="lg:col-span-2 grid grid-cols-2 sm:grid-cols-3 gap-3">
-              @for(detail of weatherDetails; track detail.label){
-                <div class="bg-gray-50 rounded-lg p-4 border border-gray-200 hover:border-blue-300 transition-colors">
-                  <div class="flex items-center gap-2 mb-1">
-                    <span class="text-xl">{{ detail.icon }}</span>
-                    <span class="text-xs text-gray-500 font-medium">{{ detail.label }}</span>
-                  </div>
-                  <div class="text-2xl font-bold text-gray-900">{{ detail.value }}</div>
-                </div>
-              }
+              <div class="text-gray-600 text-sm font-medium mb-1 ml-auto">
+                434/66
+              </div> -->
+            <div class="flex items-end justify-between mt-4">
+              <div class="text-4xl font-bold text-gray-900">
+                {{ currentTemp }}°{{ isCelsius ? "C" : "F" }}
+              </div>
+              <div class="flex gap-2 text-sm text-gray-500">
+                <span class="flex items-center gap-0.5">
+                  <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                    <path
+                      fill-rule="evenodd"
+                      d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z"
+                      clip-rule="evenodd"
+                    ></path>
+                  </svg>
+                  {{ maxCurrentTemp }}°{{ isCelsius ? "C" : "F" }}
+                </span>
+                <span class="flex items-center gap-0.5">
+                  <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                    <path
+                      fill-rule="evenodd"
+                      d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                      clip-rule="evenodd"
+                    ></path>
+                  </svg>
+                  {{ minCurrentTemp }}°{{ isCelsius ? "C" : "F" }}
+                </span>
+              </div>
             </div>
           </div>
-  
-          <!-- Divider -->
-          <div class="border-t border-gray-200 my-6"></div>
-  
-          <!-- 3-Day Forecast -->
-          <div class="mb-2">
+
+          <!-- Weather Details Grid -->
+          <div class="lg:col-span-2 grid grid-cols-2 sm:grid-cols-3 gap-3">
+            @for(detail of weatherDetails; track detail.label){
+            <div
+              class="bg-gray-50 rounded-lg p-4 border border-gray-200 hover:border-blue-300 transition-colors"
+            >
+              <div class="flex items-center gap-2 mb-1">
+                <span class="text-xl">{{ detail.icon }}</span>
+                <span class="text-xs text-gray-500 font-medium">{{
+                  detail.label
+                }}</span>
+              </div>
+              @if(detail.label === 'Feels Like'){
+              <div class="text-2xl font-bold text-gray-900">
+                {{ detail.value }}{{ isCelsius ? "C" : "F" }}
+              </div>
+              }@else{
+              <div class="text-2xl font-bold text-gray-900">
+                {{ detail.value }}
+              </div>
+              }
+            </div>
+            }
+          </div>
+        </div>
+
+        <!-- Divider -->
+        <!-- <div class="border-t border-gray-200 my-6"></div> -->
+
+        <!-- 3-Day Forecast -->
+        <!-- <div class="mb-2">
             <h2 class="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-4">3-Day Forecast</h2>
             
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -107,9 +175,8 @@
                 </div>
               }
             </div>
-          </div>
-  
-        </div>
+          </div> -->
       </div>
     </div>
   </div>
+</div>

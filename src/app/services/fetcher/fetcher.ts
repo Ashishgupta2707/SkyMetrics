@@ -9,7 +9,6 @@ import { env } from '../../enviroments/environment';
 export class Fetcher {
 
   SERVER_URL:string = env.SERVER_URL;
-  Node_URL:string = env.NodeURL;
 
   private http: HttpClient = inject(HttpClient);
 

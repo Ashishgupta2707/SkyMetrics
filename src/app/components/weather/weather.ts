@@ -1,7 +1,9 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { NotificationService } from '../../services/notification/notification-service';
 import { Fetcher } from '../../services/fetcher/fetcher';
+import { LoaderSrv } from '../../services/loader/loader-service';
+import { env } from '../../enviroments/environment';
 
 @Component({
   selector: 'app-weather',
@@ -9,23 +11,26 @@ import { Fetcher } from '../../services/fetcher/fetcher';
   templateUrl: './weather.html',
   styleUrl: './weather.scss',
 })
-export class Weather {
+export class Weather implements OnInit {
   private notify: NotificationService = inject(NotificationService);
   private fetcher: Fetcher = inject(Fetcher);
+  private loader: LoaderSrv = inject(LoaderSrv);
 
-  isCelsius = false;
+  isCelsius = true;
   location = '';
   currentDate = '11/26/2025';
   currentTemp: string = '79';
+  minCurrentTemp: string = '79';
+  maxCurrentTemp: string = '79';
   weatherCondition = 'Sunny';
 
   weatherDetails: any[] = [
     { icon: '🌡️', label: 'Feels Like', value: '82.5°' },
-    { icon: '🌧️', label: 'Chance of Rain', value: '0%' },
+    { icon: '📏', label: 'Pressure', value: '2 in' },
     { icon: '💧', label: 'Humidity', value: '83%' },
-    { icon: '💨', label: 'Wind (mph)', value: '6.9' },
-    { icon: '☀️', label: 'UV', value: '0.9' },
-    { icon: '❄️', label: 'Chance of Snow', value: '0%' },
+    { icon: '💨', label: 'Wind (mph)', value: '6.9 mph' },
+    { icon: '☀️', label: 'Sunrise', value: '07:10 AM' },
+    { icon: '🌑', label: 'Sunset', value: '06:30 PM ' },
   ];
 
   forecast: any[] = [
@@ -54,6 +59,10 @@ export class Weather {
       highlighted: false,
     },
   ];
+
+  ngOnInit(): void {
+    // this.dateBlock();
+  }
 
   toggleTemperatureUnit() {
     this.isCelsius = !this.isCelsius;
@@ -84,6 +93,12 @@ export class Weather {
     this.currentTemp = this.toFixed(
       this.fahrenheitToCelsius(parseFloat(this.currentTemp))
     );
+    this.maxCurrentTemp = this.toFixed(
+      this.fahrenheitToCelsius(parseFloat(this.maxCurrentTemp))
+    );
+    this.minCurrentTemp = this.toFixed(
+      this.fahrenheitToCelsius(parseFloat(this.minCurrentTemp))
+    );
     this.forecast = this.forecast.map((day) => ({
       ...day,
       temp: this.toFixed(this.celsiusToFahrenheit(parseFloat(day.temp))),
@@ -101,6 +116,12 @@ export class Weather {
   private convertToCelsius() {
     this.currentTemp = this.toFixed(
       this.celsiusToFahrenheit(parseFloat(this.currentTemp))
+    );
+    this.maxCurrentTemp = this.toFixed(
+      this.celsiusToFahrenheit(parseFloat(this.maxCurrentTemp))
+    );
+    this.minCurrentTemp = this.toFixed(
+      this.celsiusToFahrenheit(parseFloat(this.minCurrentTemp))
     );
     this.forecast = this.forecast.map((day) => ({
       ...day,
@@ -136,15 +157,54 @@ export class Weather {
     };
 
     const header = {
-      'x-rapidapi-host': 'open-weather13.p.rapidapi.com',
-      'x-rapidapi-key': 'cc33edb801mshd8c8d65b779af92p1c3f1ajsn294fe801be07',
+      'x-rapidapi-host': env.Host,
+      'x-rapidapi-key': env.API_KEY,
     };
+
+    this.loader.show('Weather Data Loading...');
 
     this.fetcher.get('city', param, header, true).subscribe({
       next: (res: any) => {
         if (res) {
           console.log(res);
+          if (
+            res['weather'] &&
+            res['weather'].length &&
+            res['weather'][0].description
+          ) {
+            this.weatherCondition = res['weather'][0].description;
+          }
+          if (res['main']) {
+            if (res['main'].temp) {
+              this.currentTemp = this.toFixed(res['main'].temp);
+            }
+            if (res['main'].temp_max) {
+              this.maxCurrentTemp = this.toFixed(res['main'].temp_max);
+            }
+            if (res['main'].temp_min) {
+              this.minCurrentTemp = this.toFixed(res['main'].temp_min);
+            }
+          }
+
+          this.weatherDetails[0].value = this.toFixed(res['main'].feels_like);
+          this.weatherDetails[1].value = res['main'].pressure + ' in';
+          this.weatherDetails[2].value = res['main'].humidity + '%';
+          this.weatherDetails[3].value = res['wind'].speed + ' mph';
+          this.weatherDetails[4].value = this.getTimeFormated(
+            res['sys'].sunrise,
+            res['timezone']
+          );
+          this.weatherDetails[5].value = this.getTimeFormated(
+            res['sys'].sunset,
+            res['timezone']
+          );
+
+          this.loader.hide();
         }
+      },
+      error: (err: Error) => {
+        this.loader.hide();
+        console.error(err);
       },
     });
   }
@@ -152,5 +212,61 @@ export class Weather {
   cityEntered() {
     console.log(this.location);
     this.loadWeatherData();
+  }
+
+  dateBlock() {
+    // let myDate = new Date();
+    // console.log('myDate');
+    // console.log(myDate);
+    // console.log(typeof myDate);
+    // console.log('toDateString');
+    // console.log(myDate.toDateString());
+    // console.log(typeof myDate.toDateString());
+    // console.log('toISOString');
+    // console.log(myDate.toISOString());
+    // console.log(typeof myDate.toISOString());
+    // console.log('toJSON');
+    // console.log(myDate.toJSON());
+    // console.log(typeof myDate.toJSON());
+    // console.log('toLocaleDateString');
+    // console.log(myDate.toLocaleDateString());
+    // console.log(typeof myDate.toLocaleDateString());
+    // console.log('toLocaleString');
+    // console.log(myDate.toLocaleString());
+    // console.log(typeof myDate.toLocaleString());
+    // console.log('toLocaleTimeString');
+    // console.log(myDate.toLocaleTimeString());
+    // console.log(typeof myDate.toLocaleTimeString());
+    // console.log('toTimeString');
+    // console.log(myDate.toTimeString());
+    // console.log(typeof myDate.toTimeString());
+    // console.log('toUTCString');
+    // console.log(myDate.toUTCString());
+    // console.log(typeof myDate.toUTCString());
+    // let myCreatedDate = new Date(2023, 0 ,23);
+    // let myCreatedDate = new Date(2023, 0 ,23, 13, 33, 3);
+    // let myCreatedDate = new Date("07-27-1998");
+    // console.log(myCreatedDate.toLocaleString());
+    // let myTimeStamp = Date.now();
+    // console.log(myTimeStamp);
+    // let myDateTime = new Date('11-29-2025').getTime();
+    // console.log(myDateTime);
+    // console.log(new Date().getMonth());
+    // console.log(new Date().getDay());
+  }
+
+  getTimeFormated(epochSeconds: any, timezoneOffset: number): string {
+    // Calculate the actual time at the location
+    const milliseconds = (epochSeconds + timezoneOffset) * 1000;
+    const date = new Date(milliseconds);
+
+    // Use UTC methods since we've already adjusted for timezone
+    let hours = date.getUTCHours();
+    const minutes = date.getUTCMinutes();
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+
+    hours = hours % 12 || 12;
+
+    return `${hours}:${String(minutes).padStart(2, '0')} ${ampm}`;
   }
 }
